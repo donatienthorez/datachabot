@@ -30,7 +30,7 @@ def load_and_split_documents(chunk_size, chunk_overlap):
 
 def main():
     load_dotenv()
-    chunk_size = 1024
+    chunk_size = 128
     chunk_overlap = 100
 
     chunks = load_and_split_documents(chunk_size, chunk_overlap)

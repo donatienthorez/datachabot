@@ -1,44 +1,33 @@
-from dotenv import load_dotenv
-from langchain.llms import HuggingFaceHub
-from langchain.embeddings import HuggingFaceEmbeddings
-from langchain.vectorstores import FAISS
-from langchain.chains import RetrievalQA
+import streamlit as st
 
-if __name__ == '__main__':
-    load_dotenv()
-    embeddings = HuggingFaceEmbeddings(model_name="sentence-transformers/all-MiniLM-L6-v2")
-    vector_store = FAISS.load_local("faiss_vector_db", embeddings= embeddings)
-    repo_id = "tiiuae/falcon-7b-instruct"
-    llm = HuggingFaceHub(
-        repo_id=repo_id,
-        model_kwargs={
-            "temperature": 0.1,
-            "max_new_tokens":100,
-        },
-    )
+from retrieve import load, generate_response
 
-    qa = RetrievalQA.from_chain_type(
-        llm=llm, 
-        chain_type="stuff",
-        retriever=vector_store.as_retriever(), 
-        return_source_documents = True
-    )
+qa = load()
 
-    exit_conditions = (":q", "quit", "exit")
-    while True:
-        query = input("\nType your question\n")
+st.title("ChatGPT-like clone")
 
-        if query in exit_conditions:
-            break
-        else:
-            result = qa(query)
-            print("-" * 60)
-            for index, doc in enumerate(result["source_documents"], start=1):
-                print(f"Document {index}:")
-                print("Page Content:")
-                print(doc.page_content)
-                print("Metadata:", doc.metadata)
-                print("-" * 40)
+# Initialize chat history
+if "messages" not in st.session_state:
+    st.session_state.messages = []
 
-            print("\n")
-            print("Result:", result["result"])
+# Display chat messages from history on app rerun
+for message in st.session_state.messages:
+    with st.chat_message(message["role"]):
+        st.markdown(message["content"])
+
+# Accept user input
+if prompt := st.chat_input("What is up?"):
+    # Add user message to chat history
+    st.session_state.messages.append({"role": "user", "content": prompt})
+    # Display user message in chat message container
+    with st.chat_message("user"):
+        st.markdown(prompt)
+
+    # Display assistant response in chat message container
+    with st.chat_message("assistant"):
+        message_placeholder = st.empty()
+        response, sources = generate_response(prompt, qa)
+
+        message_placeholder.markdown(response)
+        st.session_state.messages.append({"role": "assistant", "content": response})
+        
