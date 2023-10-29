@@ -5,7 +5,9 @@ from components.embeddings import Embeddings
 from components.llm import Llm
 from components.qa_model import QA_Model
 
-from chat import create_chat, create_setup
+import streamlit as st
+
+from chat import create_application
 
 def main():
     load_dotenv()
@@ -14,10 +16,7 @@ def main():
     vector_store = VectorStore(embeddings=embeddings.get())
     qa_model = QA_Model(vector_store=vector_store, llm=llm)
 
-    if vector_store.exists():
-        create_chat(qa_model=qa_model)
-    else:
-        create_setup()
+    create_application(qa_model=qa_model)
 
 
 if __name__ == "__main__":
