@@ -1,11 +1,10 @@
 from dotenv import load_dotenv
 from langchain.chains import RetrievalQA
 
-from components.vectorstore import VectorStore
-from components.llm import Llm
+from components.vector_store.vectorstore import VectorStore
+from components.llm.llm import Llm
 
 class QA_Model:
-
     def __init__(self, vector_store: VectorStore, llm: Llm):
         self.vector_store = vector_store
         self.llm = llm
@@ -14,7 +13,7 @@ class QA_Model:
         retrievalQA = RetrievalQA.from_chain_type(
                 llm=self.llm.get(), 
                 chain_type="stuff",
-                retriever=self.vector_store.load().as_retriever(), 
+                retriever=self.vector_store.load().as_retriever(search_kwargs={"k": 2}),
                 return_source_documents=True
             )
 

@@ -5,7 +5,6 @@ CHUNK_SIZE = 1028
 CHUNK_OVERLAP = 100
 
 class DocumentSplitter:
-
     def create_chunks(self):
         print ("Loading documents...")
         loader = DirectoryLoader(
